@@ -1,4 +1,4 @@
 js-svu
 ======
 
-A simple validation utility for javascript
+A simple object validation utility for javascript
