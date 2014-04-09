@@ -5,6 +5,10 @@
   "version": "0.0.1",
   "license": "MIT",
   "main" : "index",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rmack005/js-svu.git"
+  },
   "dependencies": {
     "lodash": ">= 2.4.1"
   },
