@@ -2,7 +2,7 @@ js-svu
 ======
 
 A simple object validation utility for javascript inspired by [`Fluent Validation`](http://fluentvalidation.codeplex.com/) 
-and [`Mocha`](http://fluentvalidation.codeplex.com/).  Combine with your favorite assertion library (I like [Chai](http://chaijs.com/)).
+and [`Mocha`](http://visionmedia.github.io/mocha/).  Combine with your favorite assertion library (I like [Chai](http://chaijs.com/)).
 
 ```js
 var validation = require("js-svu");
@@ -35,6 +35,8 @@ npm install js-svu
 First, define a validator.
 
 ```js
+var validation = require("js-svu");
+
 var validator = validation.create({
     field1: function(it) {expect(it).to.equal(1);},
     field2: function(it) {expect(it).to.equal("test");}
@@ -58,8 +60,8 @@ var isValid = validation.isValid(result)
 ```
 
 The object above should fail validation (field2 is equal to "test1", not "test").
-Examine the result to determine if the object passed validation, and if not,
-why.  For each property in the object being validated a property with the same name
+Examine the result to determine if the object passed validation, and if not why.  
+For each property in the object being validated a property with the same name
 is added to the result object, but instead of containing a copy of the value
 it contains an error message.  The presense of a property in the result object
 indicates a problem with the associated property in the validated object.  If a
