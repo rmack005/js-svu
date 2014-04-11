@@ -43,88 +43,127 @@ describe('CollectionValidator',function() {
 
 describe('Validator Method',function() { 
     it('should return error(s) if the object is not valid.', function(){
-        var validator = validation.create({
-            field1: function(it) {expect(it).to.equal(1);},
-            field2: function(it) {expect(it).to.equal("test");}
+        var nameValidator = validation.create({
+            firstName: function(it) {
+                expect(it).to.be.a('string');
+                expect(it).to.not.be.empty;
+                expect(it).to.have.length.below(30);
+            },
+            lastName: function(it) {
+                expect(it).to.be.a('string');
+                expect(it).to.not.be.empty;
+                expect(it).to.have.length.below(40);
+            },
         });
 
-        var obj = {
-            field1: 1,
-            field2: "test1",
+        var name = {
+            firstName: 1,
+            lastName: "Doe",
         };
 
-        var result = validator(obj);
+        var result = nameValidator(name);
 
         expect(validation.isValid(result)).to.equal(false);
-        expect(result).to.have.property('field2');
-        expect(result).to.not.have.property('field1');
+        expect(result).to.have.property('firstName');
+        expect(result).to.not.have.property('lastName');
     }); 
 
     it('should support nested validators.', function(){
-        var validator1 = validation.create({
-            inner1: function(it) {expect(it).to.equal("test");}
-        });
-
-        var validator2 = validation.create({
-            field1: function(it) {expect(it).to.equal(1);},
-            field2: function(it) {expect(it).to.equal("test");},
-            field3: function(it) {return validator1(it);}
-        });
-
-        var obj = {
-            field1: 1,
-            field2: "test1",
-            field3: {
-                inner1: "test1"
+        var nameValidator = validation.create({
+            firstName: function(it) {
+                expect(it).to.be.a('string');
+                expect(it).to.not.be.empty;
+                expect(it).to.have.length.below(30);
             },
+            lastName: function(it) {
+                expect(it).to.be.a('string');
+                expect(it).to.not.be.empty;
+                expect(it).to.have.length.below(40);
+            },
+        });
+
+        var studentValidator = validation.create({
+            name: function(it) {return nameValidator(it);},
+            id: function(it) {
+                expect(it).to.be.a('number');
+                expect(it).to.be.above(0);
+            },
+            gpa: function(it) {
+                expect(it).to.be.a('number');
+                expect(it).to.be.within(0,4);
+            },
+        });
+
+        var student = {
+            name: {
+                firstName: 1,
+                lastName: "Doe",
+            },
+            id: "invalidId",
+            gpa: 3.4
         };
 
-        var result = validator2(obj);
+        var result = studentValidator(student);
 
         expect(validation.isValid(result)).to.equal(false);
-        expect(result).to.have.property('field2');
-        expect(result).to.have.property('field3');
-        expect(result.field3).to.have.property('inner1');
-        expect(result).to.not.have.property('field1');
+        expect(result).to.have.property('name');
+        expect(result).to.have.property('id');
+        expect(result.name).to.have.property('firstName');
+        expect(result).to.not.have.property('gpa');
     }); 
 
     it('should not return error(s) if the object is valid.', function(){
-        var validator = validation.create({
-            field1: function(it) {expect(it).to.equal(1);},
-            field2: function(it) {expect(it).to.equal("test");}
+        var nameValidator = validation.create({
+            firstName: function(it) {
+                expect(it).to.be.a('string');
+                expect(it).to.not.be.empty;
+                expect(it).to.have.length.below(30);
+            },
+            lastName: function(it) {
+                expect(it).to.be.a('string');
+                expect(it).to.not.be.empty;
+                expect(it).to.have.length.below(40);
+            },
         });
 
-        var obj = {
-            field1: 1,
-            field2: "test",
+        var name = {
+            firstName: "john",
+            lastName: "doe",
         };
 
-        var result = validator(obj);
+        var result = nameValidator(name);
 
         expect(validation.isValid(result)).to.equal(true);
-        expect(result).to.not.have.property('field1');
-        expect(result).to.not.have.property('field2');
+        expect(result).to.not.have.property('firstName');
+        expect(result).to.not.have.property('lastName');
     }); 
 });
 
 
 describe('CollectionValidator Method',function() { 
     it('should return error(s) if the object(s) are not valid.', function(){
-        var myObjectValidator = validation.create({
-            id: function(it) {expect(it).to.be.a('number');},
-            field1: function(it) {expect(it).to.be.a('number');},
-            field2: function(it) {expect(it).to.be.a("string");}
+        var nameValidator = validation.create({
+            firstName: function(it) {
+                expect(it).to.be.a('string');
+                expect(it).to.not.be.empty;
+                expect(it).to.have.length.below(30);
+            },
+            lastName: function(it) {
+                expect(it).to.be.a('string');
+                expect(it).to.not.be.empty;
+                expect(it).to.have.length.below(40);
+            },
         });
 
-        var myObjectCollectionValidator = validation.create(myObjectValidator);
+        var nameCollectionValidator = validation.create(nameValidator);
 
-        var array = [
-            {id: 1, field1: 1, field2: "test1"},
-            {id: 2, field1: 123, field2: "testing"},
-            {id: 3, field1: "test", field2: "$1.23"}
+        var nameCollection = [
+            {firstName: "john", lastName: "doe"},
+            {firstName: "jane", lastName: "doe"},
+            {firstName: 5.2, lastName: "doe"}
         ];
 
-        var result = myObjectCollectionValidator(array);
+        var result = nameCollectionValidator(nameCollection);
 
         expect(validation.isValid(result)).to.equal(false);
 
@@ -135,26 +174,42 @@ describe('CollectionValidator Method',function() {
 
 describe('getErrorCollection',function() { 
     it('should return a flat list of errors.', function(){
-        var validator1 = validation.create({
-            inner1: function(it) {expect(it).to.equal("test");}
-        });
-
-        var validator2 = validation.create({
-            field1: function(it) {expect(it).to.equal(1);},
-            field2: function(it) {expect(it).to.equal("test");},
-            field3: function(it) {return validator1(it);}
-        });
-
-        var obj = {
-            field1: 1,
-            field2: "test1",
-            field3: {
-                inner1: "test1"
+        var nameValidator = validation.create({
+            firstName: function(it) {
+                expect(it).to.be.a('string');
+                expect(it).to.not.be.empty;
+                expect(it).to.have.length.below(30);
             },
+            lastName: function(it) {
+                expect(it).to.be.a('string');
+                expect(it).to.not.be.empty;
+                expect(it).to.have.length.below(40);
+            },
+        });
+
+        var studentValidator = validation.create({
+            name: function(it) {return nameValidator(it);},
+            id: function(it) {
+                expect(it).to.be.a('number');
+                expect(it).to.be.above(0);
+            },
+            gpa: function(it) {
+                expect(it).to.be.a('number');
+                expect(it).to.be.within(0,4);
+            },
+        });
+
+        var student = {
+            name: {
+                firstName: 1,
+                lastName: "Doe",
+            },
+            id: "invalidId",
+            gpa: 3.4
         };
 
-        var result = validator2(obj);
-        var errorCollection = validation.getErrorCollection(result);
+        var result = studentValidator(student);
+        var errorCollection = validation.flatten(result);
 
         expect(validation.isValid(result)).to.equal(false);
         expect(Object.keys(errorCollection)).to.have.length(2);

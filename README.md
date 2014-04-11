@@ -7,17 +7,25 @@ and [`Mocha`](http://visionmedia.github.io/mocha/).  Combine with your favorite 
 ```js
 var validation = require("js-svu");
 
-var validator = validation.create({
-    field1: function(it) {expect(it).to.equal(1);},
-    field2: function(it) {expect(it).to.equal("test");}
+var nameValidator = validation.create({
+    firstName: function(it) {
+        expect(it).to.be.a('string');
+        expect(it).to.not.be.empty;
+        expect(it).to.have.length.below(30);
+    },
+    lastName: function(it) {
+        expect(it).to.be.a('string');
+        expect(it).to.not.be.empty;
+        expect(it).to.have.length.below(40);
+    },
 });
 
-var obj = {
-    field1: 1,
-    field2: "test1",
+var name = {
+    firstName: 1,
+    lastName: "Doe",
 };
 
-var result = validator(obj);
+var result = nameValidator(name);
 ```
 
 __Warning__: this library is still experimental and the API unstable.
@@ -37,36 +45,99 @@ First, define a validator.
 ```js
 var validation = require("js-svu");
 
-var validator = validation.create({
-    field1: function(it) {expect(it).to.equal(1);},
-    field2: function(it) {expect(it).to.equal("test");}
+var nameValidator = validation.create({
+    firstName: function(it) {
+        expect(it).to.be.a('string');
+        expect(it).to.not.be.empty;
+        expect(it).to.have.length.below(30);
+    },
+    lastName: function(it) {
+        expect(it).to.be.a('string');
+        expect(it).to.not.be.empty;
+        expect(it).to.have.length.below(40);
+    },
 });
 ```
 
 The above validator ensures that every object it validates has a property 
-named "field1" one that's equal to 1, and a property named "field2"
-that's equal to "test".
+named "firstName" that's a non-empty string whose length is less than 30, 
+and a property named "lastName" that's a non-empty string whose length is less than 40.
 
 Next, use the validator to validate an object.
 
 ```js
-var obj = {
-    field1: 1,
-    field2: "test1",
+var name = {
+    firstName: 1,
+    lastName: "Doe",
 };
 
-var result = validator(obj);
+var result = nameValidator(name);
 var isValid = validation.isValid(result)
 ```
 
-The object above should fail validation (field2 is equal to "test1", not "test").
-Examine the result to determine if the object passed validation, and if not why.  
-For each property in the object being validated a property with the same name
+Examine the result to determine if the object passed validation, and if not why (
+the object above should fail validation since firstName is not a string). For 
+each property in the object being validated a property with the same name
 is added to the result object, but instead of containing a copy of the value
-it contains an error message.  The presense of a property in the result object
-indicates a problem with the associated property in the validated object.  If a
-result object contains no properties, validation succeeded.
+it contains an error message.  
 
+```js
+result.firstName === "Some error message about the type being wrong.";
+```
+
+The presense of a property in the result object
+indicates a problem with the associated property in the validated object.  If a
+result object contains no properties, all properties are valid (a valid object).
+
+You can also flatten the result object into a simple collection of error messages.
+
+```js
+var errorCollection = validation.flatten(result);
+```
+
+Which will be empty if there are no validation issues.  And for more complex objects 
+with properties whose values are objects themselves, validation can be delegated to 
+other validators.
+
+```js
+var nameValidator = validation.create({
+    firstName: function(it) {
+        expect(it).to.be.a('string');
+        expect(it).to.not.be.empty;
+        expect(it).to.have.length.below(30);
+    },
+    lastName: function(it) {
+        expect(it).to.be.a('string');
+        expect(it).to.not.be.empty;
+        expect(it).to.have.length.below(40);
+    },
+});
+
+var studentValidator = validation.create({
+    name: function(it) {return nameValidator(it);},
+    id: function(it) {
+        expect(it).to.be.a('number');
+        expect(it).to.be.above(0);
+    },
+    gpa: function(it) {
+        expect(it).to.be.a('number');
+        expect(it).to.be.within(0,4);
+    },
+});
+
+var student = {
+    name: {
+        firstName: 1,
+        lastName: "Doe",
+    },
+    id: "invalidId",
+    gpa: 3.4
+};
+
+var result = studentValidator(student);
+result.name.firstName === "Some error message about the type being wrong.";
+result.id === "Some error message about the type being wrong.";
+```
 
 ## Features
 
