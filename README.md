@@ -139,13 +139,14 @@ result.name.firstName === "Some error message about the type being wrong.";
 result.id === "Some error message about the type being wrong.";
 ```
 
-## Features
-
-Not written yet.
-
 ## Philosophy
 
-Not written yet.
+The basic philosophy behind the utility is that validators should be written in terms
+closly related to the objects being validated, and that the results should also be 
+reported in terms closely related to those objects.  In pratice this 
+means that each property in an object should have an associated property in 
+the validator that contains the function that validates the value, and an associated
+property in the result (if it fails validation) that contains the error message.
 
 ## Examples
 
