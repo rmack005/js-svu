@@ -42,7 +42,7 @@ describe('CollectionValidator',function() {
 });
 
 describe('Validator Method',function() { 
-    it('should return error(s) if the object is not valid.', function(){
+    it('should return error(s) if the object is not valid (exceptions).', function(){
         var nameValidator = validation.create({
             firstName: function(it) {
                 expect(it).to.be.a('string');
@@ -54,6 +54,48 @@ describe('Validator Method',function() {
                 expect(it).to.not.be.empty;
                 expect(it).to.have.length.below(40);
             },
+        });
+
+        var name = {
+            firstName: 1,
+            lastName: "Doe",
+        };
+
+        var result = nameValidator(name);
+
+        expect(validation.isValid(result)).to.equal(false);
+        expect(result).to.have.property('firstName');
+        expect(result).to.not.have.property('lastName');
+    }); 
+
+    it('should return error(s) if the object is not valid (error strings).', function(){
+        var nameValidator = validation.create({
+            firstName: function(it) {
+                if(typeof it !== 'string') {
+                    return "firstName must be a string.";
+                }
+
+                if(typeof it.length === 0) {
+                    return "firstName may not be empty.";
+                }
+
+                if(typeof it.length >= 30) {
+                    return "firstName must contain fewer than 30 characters.";
+                }
+            },
+            lastName: function(it) {
+                if(typeof it !== 'string') {
+                    return "lastName must be a string.";
+                }
+
+                if(typeof it.length === 0) {
+                    return "lastName may not be empty.";
+                }
+
+                if(typeof it.length >= 40) {
+                    return "lastName must contain fewer than 40 characters.";
+                }
+            }
         });
 
         var name = {
@@ -82,8 +124,11 @@ describe('Validator Method',function() {
             },
         });
 
+        var nameCollectionValidator = validation.create(nameValidator);
+
         var studentValidator = validation.create({
             name: function(it) {return nameValidator(it);},
+            aliases: function(it) {return nameCollectionValidator(it);},
             id: function(it) {
                 expect(it).to.be.a('number');
                 expect(it).to.be.above(0);
@@ -99,6 +144,10 @@ describe('Validator Method',function() {
                 firstName: 1,
                 lastName: "Doe",
             },
+            aliases: [
+                {firstName: "Johnson", lastName: "Doe"},
+                {firstName: "Johnny", lastName: "Doe"}
+            ],
             id: "invalidId",
             gpa: 3.4
         };
@@ -108,6 +157,7 @@ describe('Validator Method',function() {
         expect(validation.isValid(result)).to.equal(false);
         expect(result).to.have.property('name');
         expect(result).to.have.property('id');
+        expect(result).to.not.have.property('aliases');
         expect(result.name).to.have.property('firstName');
         expect(result).to.not.have.property('gpa');
     }); 

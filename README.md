@@ -8,6 +8,7 @@ __Warning__: this library is still experimental and the API unstable.
 
 ```js
 var validation = require("js-svu");
+var expect = require('chai').expect;
 
 var nameValidator = validation.create({
     firstName: function(it) {
@@ -38,12 +39,15 @@ Using [`npm`](http://npmjs.org/):
 npm install js-svu
 ```
 
+Note: js-svu currently depends on lodash.  And is best used with an asertion library of some sort.
+
 ## Quick Start
 
 First, define a validator.
 
 ```js
 var validation = require("js-svu");
+var expect = require('chai').expect;
 
 var nameValidator = validation.create({
     firstName: function(it) {
@@ -55,13 +59,48 @@ var nameValidator = validation.create({
         expect(it).to.be.a('string');
         expect(it).to.not.be.empty;
         expect(it).to.have.length.below(40);
-    },
+    }
 });
 ```
 
 The above validator ensures that every object it validates has a property 
 named "firstName" that's a non-empty string whose length is less than 30, 
 and a property named "lastName" that's a non-empty string whose length is less than 40.
+The above example validator makes use of Chai's expect API which throws exceptions (that js-svu handles),
+but one could also simply return a string (an error message) to indicate failure.
+
+```js
+var validation = require("js-svu");
+
+var nameValidator = validation.create({
+    firstName: function(it) {
+        if(typeof it !== 'string') {
+        	return "firstName must be a string.";
+    	}
+
+        if(typeof it.length === 0) {
+        	return "firstName may not be empty.";
+    	}
+
+        if(typeof it.length >= 30) {
+        	return "firstName must contain fewer than 30 characters.";
+    	}
+    },
+    lastName: function(it) {
+        if(typeof it !== 'string') {
+        	return "lastName must be a string.";
+    	}
+
+        if(typeof it.length === 0) {
+        	return "lastName may not be empty.";
+    	}
+
+        if(typeof it.length >= 40) {
+        	return "lastName must contain fewer than 40 characters.";
+    	}
+    }
+});
+```
 
 Next, use the validator to validate an object.
 
@@ -95,7 +134,7 @@ You can also flatten the result object into a simple collection of error message
 var errorCollection = validation.flatten(result);
 ```
 
-Which will be empty if there are no validation issues.  And for more complex objects 
+Which will be empty if no of the validations failed.  And for more complex objects 
 with properties whose values are objects themselves, validation can be delegated to 
 other validators.
 
