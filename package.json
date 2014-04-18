@@ -2,7 +2,7 @@
   "name": "js-svu",
   "description": "A simple object validation utility for javascript",
   "author" : "Ryan Mack <rmack005@gmail.com>",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "MIT",
   "main" : "index",
   "repository": {
