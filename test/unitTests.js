@@ -222,6 +222,37 @@ describe('CollectionValidator Method',function() {
     });    
  });
 
+describe('CollectionValidator Method',function() { 
+    it('should support validation of simple types.', function(){
+        var stateCollectionValidator = validation.create(function(it) {
+            expect(it).to.be.a('string').and.have.length(2);
+        });
+
+        var stateCollection = [
+            'VA',
+            'TX',
+            'MA',
+            'ZZZ'
+        ];
+
+        var result = stateCollectionValidator(stateCollection);
+
+        expect(validation.isValid(result)).to.equal(false);
+
+        //  can't rely on result.length because the array may be sparse
+        expect(Object.keys(result)).to.have.length(1);
+
+        stateCollection = [
+            'VA',
+            'TX',
+            'MA'
+        ];
+
+        result = stateCollectionValidator(stateCollection);
+        expect(validation.isValid(result)).to.equal(true);
+    });    
+ });
+
 describe('getErrorCollection',function() { 
     it('should return a flat list of errors.', function(){
         var nameValidator = validation.create({
