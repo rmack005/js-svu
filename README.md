@@ -2,7 +2,7 @@ js-svu
 ======
 
 A simple object validation utility for javascript inspired by [`Fluent Validation`](http://fluentvalidation.codeplex.com/) 
-and [`Mocha`](http://visionmedia.github.io/mocha/).  Combine with your favorite assertion library (I like [`Chai`](http://chaijs.com/)).
+and [`Mocha`](http://mochajs.org/).  Combine with your favorite assertion library (I like [`Chai`](http://chaijs.com/)).
 
 __Warning__: this library is still experimental and the API unstable.
 
